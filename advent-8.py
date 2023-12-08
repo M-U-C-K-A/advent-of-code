@@ -26,4 +26,4 @@ def part2t2(dir_sequence, map):
 if __name__ == "__main__":
     with open("input.txt", "r") as ifile:
         i_data = ifile.read().strip()
-    print("Nr. of steps, \n part 1 {} \n part 2:{}".format(part1(*process_input(i_data)), part2t2(*process_input(i_data))))
+    print("Nr. of steps, \n part 1 : {} \n part 2 : {}".format(part1(*process_input(i_data)), part2t2(*process_input(i_data))))
