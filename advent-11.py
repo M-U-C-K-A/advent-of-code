@@ -1,90 +1,110 @@
-import time
+mat = []
+with open("input.txt","r") as f:
+    for line in f:
+        if line.count("#") == 0:
+            for i in range(2):
+                mat.append([char for char in line.replace("\n", "")])
+        else:
+            mat.append([char for char in line.replace("\n", "")])
 
-filename = "input.txt"
+    mat = [list(x) for x in zip(*mat)]
 
+    matt = []
 
-def read_galaxy() -> tuple[list[list[str]], int]:
-    galaxy = []
-    num_galaxies = 0
-    with open(filename, "r") as f:
-        for line in f.readlines():
-            row = []
-            for char in line.strip():
-                if char == "#":
-                    row.append(num_galaxies)
-                    num_galaxies += 1
-                else:
-                    row.append(char)
-            galaxy.append(row)
-    return galaxy, num_galaxies
-
-
-def get_empty_rows(galaxy: list[list[str]]) -> list[int]:
-    empty_rows = []
-    for idx, row in enumerate(galaxy):
-        if all([char == "." for char in row]):
-            empty_rows.append(idx)
-    return empty_rows
+    for line in mat:
+        if line.count("#") == 0:
+            for i in range(2):
+                matt.append(line)
+        else:
+            matt.append(line)
     
+    mat = matt
 
-def get_empty_cols(galaxy: list[list[str]]) -> list[int]:
-    empty_cols = []
-    for idy in range(len(galaxy[0])):
-        if all([galaxy[idx][idy] == "." for idx in range(len(galaxy))]):
-            empty_cols.append(idy)
-    return empty_cols
-
-
-def get_galaxies_positions(galaxy: list[list[str]]) -> dict[int, tuple[int, int]]:
-    return {
-        galaxy[idx][idy]: (idx, idy)
-        for idx in range(len(galaxy))
-        for idy in range(len(galaxy[0]))
-        if galaxy[idx][idy] != "."
-    }
+    locs = []
+    for i in range(len(mat)):
+        for j in range(len(mat[i])):
+            if mat[i][j] == "#":
+                locs.append((i, j))
 
 
-def manhattan_distance(point1: tuple[int, int], point2: tuple[int, int]) -> int:
-    return sum([abs(point1[0] - point2[0]), abs(point1[1] - point2[1])])
-
-
-def get_extra_for_crossing_empties(
-    point1: tuple[int, int], 
-    point2: tuple[int, int],
-    empty_rows: list[int], 
-    empty_cols: list[int],
-) -> int:
-    extra = 0
-    min_x, max_x = (point1[0], point2[0]) if point1[0] < point2[0] else (point2[0], point1[0])
-    for row in empty_rows:
-        if min_x < row < max_x:
-            extra += 1_000_000 - 1
-            
-    min_y, max_y = (point1[1], point2[1]) if point1[1] < point2[1] else (point2[1], point1[1])
-    for col in empty_cols:
-        if min_y < col < max_y:
-            extra += 1_000_000 - 1
+    res = 0
     
-    return extra
+    done = set()
     
+    for a in locs:
+        for b in locs:
+            if (a, b) not in done and (b, a) not in done and a!=b:
+                done.add((a, b))
+                res += (max(a[0], b[0])-min(a[0],b[0]))+(max(a[1], b[1])-min(a[1], b[1]))
+    
+    
+    print("PART 1 : ",res)
+    
+    mat = []
 
-start_time = time.time()
-galaxy, num_galaxies = read_galaxy()
-galaxies_positions = {
-    galaxy[idx][idy]: (idx, idy)
-    for idx in range(len(galaxy))
-    for idy in range(len(galaxy[0]))
-    if galaxy[idx][idy] != "."
-}
-pairs = [(i, j) for i in range(num_galaxies) for j in range(i, num_galaxies) if i < j]
-empty_rows = get_empty_rows(galaxy)
-empty_cols = get_empty_cols(galaxy)
-total = sum([
-    (
-        manhattan_distance(galaxies_positions[i], galaxies_positions[j]) 
-        + get_extra_for_crossing_empties(galaxies_positions[i], galaxies_positions[j], empty_rows, empty_cols)
-    )
-    for i, j in pairs
-])
-print("TOTAL: ", total)
-print("--- %s seconds ---" % (time.time() - start_time))
+def sig(a):
+    if a == 0:
+        return 0
+    else:
+        return int(a/abs(a))
+
+def dist(a, b):
+    dx = b[0]-a[0]
+    dy = b[1]-a[1]
+    x = []
+    y = []
+    if dx == 0:
+        x = []
+    else:
+        i = a[0]
+        while i !=b[0]:
+            i+=sig(dx)
+            x.append(mat[i][a[1]])
+    if dy == 0:
+        y = []
+    else:
+        i = a[1]
+        while i != b[1]:
+            i+=sig(dy)
+            y.append(mat[a[0]][i])
+
+    return x.count("E")*1000000+len(x)-x.count("E") + y.count("E")*1000000+len(y)-y.count("E")
+
+
+with open("input.txt","r") as f:
+    for line in f:
+        if line.count("#") == 0:
+                mat.append(["E" for char in line.replace("\n", "")])
+        else:
+            mat.append([char for char in line.replace("\n", "")])
+
+    mat = [list(x) for x in zip(*mat)]
+
+    matt = []
+
+    for line in mat:
+        if line.count("#") == 0:
+            matt.append(["E" for _ in line])
+        else:
+            matt.append(line)
+    
+    mat = matt
+
+    locs = []
+    for i in range(len(mat)):
+        for j in range(len(mat[i])):
+            if mat[i][j] == "#":
+                locs.append((i, j))
+
+
+    res = 0
+    
+    done = set()
+    
+    for a in locs:
+        for b in locs:
+            if (a, b) not in done and (b, a) not in done and a!=b:
+                done.add((a, b))
+                res += dist(a, b)
+    
+    print('PART 2 : ',res)
